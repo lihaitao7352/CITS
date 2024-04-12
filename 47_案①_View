@@ -4,6 +4,7 @@
 マテリアライズドビューまたはキャッシュテーブルを定期的に更新することで、
 リアルタイム計算の必要性を大幅に減少させることができます。
 */
+-- 创建物化视图
 CREATE MATERIALIZED VIEW mv_example
 REFRESH COMPLETE ON DEMAND
 AS
@@ -42,7 +43,11 @@ INNER JOIN
     AND SKMD.SKMD_KM_COD = PHJD.PHJD_KM_COD
 WHERE
     PHJD.PHJD_KHA_COD = '20512'
-    AND PHJD.PHJD_TAS_YDO = '2023';
+    AND PHJD.PHJD_TAS_YDO = '2023'
+    AND PHJD.PHJD_GHM_LV1_COD = '52'
+    AND PHJD.PHJD_YSS_DTK_COD = '9'
+    AND PHJD.PHJD_YSS_DTB_COD = '92';
 
 -- 検索View
 SELECT * FROM mv_example;
+
