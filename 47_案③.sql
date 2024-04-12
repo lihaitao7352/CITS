@@ -6,6 +6,14 @@
 4:EXISTSを使用して存在性チェックを行うことで、直接のJOIN操作よりも効率的です。
 もうすごし改善ところ：COALESCE関数は短絡評価（ショートサーキット評価）を使用するため、特定の状況下でNVLよりも効率的です。
 */
+/*
+案②と茂木さん連携の改善案結合
+1:インラインビューを直接使用して、特にSKMDテーブルにフィルタ条件を適用する際、全表スキャンを減少させることができます。
+2:SUM(NVL())を使用することで、データが空でも計算を確実に行うことができます。
+3:複雑なロジックをサブクエリに分解することで、データベースのオプティマイザがクエリをより効率的に処理するのに役立つ可能性があります。
+4:EXISTSを使用して存在性チェックを行うことで、直接のJOIN操作よりも効率的です。
+もうすごし改善ところ：COALESCE関数は短絡評価（ショートサーキット評価）を使用するため、特定の状況下でNVLよりも効率的です。
+*/
 SELECT
     PHJD.PHJD_KHA_COD AS KHA_COD,
     SKMD.SKMD_SZK_COD AS SZK_COD,
@@ -13,18 +21,18 @@ SELECT
     PHJD.PHJD_TAS_YDO AS TAS_YDO,
     PPJD.PPJD_KM_COD AS IRS_KM_COD,
     SKMD.SKMD_SZK_COD AS IRS_SZK_COD,
-    SUM(NVL(PHJD.PHJD_4M_JSC, 0)) AS JSC_4M,
-    SUM(NVL(PHJD.PHJD_5M_JSC, 0)) AS JSC_5M,
-    SUM(NVL(PHJD.PHJD_6M_JSC, 0)) AS JSC_6M,
-    SUM(NVL(PHJD.PHJD_7M_JSC, 0)) AS JSC_7M,
-    SUM(NVL(PHJD.PHJD_8M_JSC, 0)) AS JSC_8M,
-    SUM(NVL(PHJD.PHJD_9M_JSC, 0)) AS JSC_9M,
+    SUM(NVL(PHJD.PHJD_4M_JSC, 0)) AS JSC_04M,
+    SUM(NVL(PHJD.PHJD_5M_JSC, 0)) AS JSC_05M,
+    SUM(NVL(PHJD.PHJD_6M_JSC, 0)) AS JSC_06M,
+    SUM(NVL(PHJD.PHJD_7M_JSC, 0)) AS JSC_07M,
+    SUM(NVL(PHJD.PHJD_8M_JSC, 0)) AS JSC_08M,
+    SUM(NVL(PHJD.PHJD_9M_JSC, 0)) AS JSC_09M,
     SUM(NVL(PHJD.PHJD_10M_JSC, 0)) AS JSC_10M,
     SUM(NVL(PHJD.PHJD_11M_JSC, 0)) AS JSC_11M,
     SUM(NVL(PHJD.PHJD_12M_JSC, 0)) AS JSC_12M,
-    SUM(NVL(PHJD.PHJD_1M_JSC, 0)) AS JSC_1M,
-    SUM(NVL(PHJD.PHJD_2M_JSC, 0)) AS JSC_2M,
-    SUM(NVL(PHJD.PHJD_3M_JSC, 0)) AS JSC_3M
+    SUM(NVL(PHJD.PHJD_1M_JSC, 0)) AS JSC_01M,
+    SUM(NVL(PHJD.PHJD_2M_JSC, 0)) AS JSC_02M,
+    SUM(NVL(PHJD.PHJD_3M_JSC, 0)) AS JSC_03M
 FROM
     BGTA2_PHJD PHJD
 INNER JOIN
