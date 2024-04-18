@@ -121,3 +121,73 @@ ORDER BY
     P.PJHD_KM_TEK_STR_YM,
     P.PJHD_KM_EBS_OBN,
     P.PJHD_PJ_KJM;
+
+
+了解了你的需求。你希望检查Excel中A列的每个值，查看它是否对应B列中多个不同的值。我们可以使用VBA编写一个脚本来实现这个功能，该脚本将检查A列中的每个值，并统计它对应的B列中不同值的数量，然后在C列中标记是否存在多种不同的B值。
+
+以下是一个VBA脚本示例，你可以用来实现这个功能：
+
+### 步骤 1: 打开VBA编辑器
+1. 在Excel中，按下 `Alt + F11` 打开VBA编辑器。
+2. 在VBA编辑器中，选择 `插入` -> `模块`，在弹出的窗口中插入一个新的模块。
+
+### 步骤 2: 复制并粘贴以下代码
+在新模块中粘贴以下代码：
+
+```vba
+Sub CheckMultipleEntries()
+    Dim ws As Worksheet
+    Dim lastRow As Long, i As Long
+    Dim dict As Object
+    Dim key As Variant
+    Dim result As String
+    
+    ' 设定工作表
+    Set ws = ThisWorkbook.Sheets("Sheet1")  ' 根据需要更改工作表名称
+    
+    ' 确定数据范围
+    lastRow = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+    
+    ' 清除之前的结果
+    ws.Range("C1:C" & lastRow).ClearContents
+    
+    ' 创建字典以存储值及其不同的计数
+    Set dict = CreateObject("Scripting.Dictionary")
+    
+    ' 遍历每一行
+    For i = 1 To lastRow
+        key = ws.Cells(i, 1).Value & "<>" & ws.Cells(i, 2).Value
+        If Not dict.Exists(key) Then
+            dict.Add key, Nothing
+        End If
+    Next i
+    
+    ' 再次遍历以标记结果
+    For i = 1 To lastRow
+        result = "单条"
+        For Each key In dict.Keys
+            If Left(key, Len(ws.Cells(i, 1).Value)) = ws.Cells(i, 1).Value Then
+                If dict(key) Is Nothing Then
+                    dict(key) = ws.Cells(i, 2).Value
+                ElseIf dict(key) <> ws.Cells(i, 2).Value Then
+                    result = "多条"
+                    Exit For
+                End If
+            End If
+        Next key
+        ws.Cells(i, 3).Value = result
+    Next i
+    
+    MsgBox "处理完成！"
+End Sub
+```
+
+### 步骤 3: 运行脚本
+- 回到Excel界面。
+- 按下 `Alt + F8`，选择 `CheckMultipleEntries`，然后点击 `运行`。
+
+这个脚本会检查A列中的每个值，并查找B列中是否存在多个不同的对应值，结果会在C列显示为“多条”或“单条”。
+
+### 注意：
+- 确保你的数据在"Sheet1"中，或者根据实际的工作表名称修改代码中的`ThisWorkbook.Sheets("Sheet1")`部分。
+- 如果数据量非常大，此宏可能运行较慢，可以考虑优化或分批处理数据。
