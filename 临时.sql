@@ -51,3 +51,11 @@ Sub ProcessBatch(ws As Worksheet, startRow As Long, endRow As Long)
         End If
     Next i
 End Sub
+---------------
+=IF(COUNTIF(FILTER(B:B, A:A=A1)) > 1, "多条", "单条")
+
+---------------------
+=1/COUNTIFS(A:A, A1, B:B, B1)
+=IF(SUMIF(A:A, A1, C:C) > 1, "多条", "单条")
+
+
