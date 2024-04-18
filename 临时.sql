@@ -191,3 +191,60 @@ End Sub
 ### 注意：
 - 确保你的数据在"Sheet1"中，或者根据实际的工作表名称修改代码中的`ThisWorkbook.Sheets("Sheet1")`部分。
 - 如果数据量非常大，此宏可能运行较慢，可以考虑优化或分批处理数据。
+
+
+--------------------------------------------------------------------------------------------------------
+Sub CheckMultipleEntriesBatch()
+    Dim ws As Worksheet
+    Set ws = ThisWorkbook.Sheets("Sheet1")  ' 确保工作表名称正确
+    Dim lastRow As Long
+    lastRow = ws.Cells(ws.Rows.Count, "D").End(xlUp).Row
+    
+    ' 批处理参数设置
+    Dim batchSize As Long
+    Dim startRow As Long, endRow As Long, batch As Long
+    
+    batchSize = 10000  ' 每批处理的行数，根据需要调整
+    
+    ' 禁用一些功能以加速处理速度
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    Application.EnableEvents = False
+    
+    ' 分批处理数据
+    For startRow = 1 To lastRow Step batchSize
+        endRow = startRow + batchSize - 1
+        If endRow > lastRow Then endRow = lastRow
+        ProcessBatch ws, startRow, endRow
+    Next startRow
+    
+    ' 重新启用Excel功能
+    Application.ScreenUpdating = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.EnableEvents = True
+    
+    MsgBox "处理完成！"
+End Sub
+
+Sub ProcessBatch(ws As Worksheet, startRow As Long, endRow As Long)
+    Dim i As Long, j As Long
+    Dim dict As Object
+    Dim key As Variant
+    Dim uniqueB As Object
+    
+    For i = startRow To endRow
+        Set dict = CreateObject("Scripting.Dictionary")
+        For j = startRow To endRow
+            If ws.Cells(j, 4).Value = ws.Cells(i, 4).Value Then  ' D列
+                dict(ws.Cells(j, 5).Value) = 1  ' E列
+            End If
+        Next j
+        
+        ' 判断是否对应多个不同的值
+        If dict.Count > 1 Then
+            ws.Cells(i, 3).Value = "多条"  ' 输出到C列
+        Else
+            ws.Cells(i, 3).Value = "单条"
+        End If
+    Next i
+End Sub
