@@ -61,3 +61,7 @@ Copy code
 
 方法2: 使用 SUMPRODUCT 函数
 =IF(COUNTIFS(A:A, A1, B:B, "<>"&B1)>0, "一对多", "一对一")
+
+
+=IF(COUNTIF(A:A, A1) > 1, "N", "")
+
