@@ -103,3 +103,46 @@ ORDER BY
     P.PJHD_KM_EBS_OBN,
     P.PJHD_PJ_KJM;
     )
+------------------------------------------------------------------
+SELECT
+    sub.KMID_KM_COD,
+    sub.KMID_TEK_STR_YM,
+    sub.KMID_TEK_END_YM,
+    sub.KMID_EBS_OBN,
+    sub.KMID_SIY_FLG,
+    sub.KMID_KM_KJM,
+    sub.PJHD_PJ_COD,
+    sub.PJHD_KM_COD,
+    sub.PJHD_KM_TEK_STR_YM,
+    sub.PJHD_KM_EBS_OBN,
+    sub.PJHD_SIY_FLG,
+    sub.PJHD_PJ_KJM,
+    CASE 
+        WHEN sub.TotalCount = 1 THEN 0
+        ELSE sub.RowNum
+    END AS RowNum
+FROM (
+    SELECT
+        K.KMID_KM_COD,
+        K.KMID_TEK_STR_YM,
+        K.KMID_TEK_END_YM,
+        K.KMID_EBS_OBN,
+        K.KMID_SIY_FLG,
+        K.KMID_KM_KJM,
+        P.PJHD_PJ_COD,
+        P.PJHD_KM_COD,
+        P.PJHD_KM_TEK_STR_YM,
+        P.PJHD_KM_EBS_OBN,
+        P.PJHD_SIY_FLG,
+        P.PJHD_PJ_KJM,
+        ROW_NUMBER() OVER (PARTITION BY K.KMID_KM_COD ORDER BY P.PJHD_PJ_COD) AS RowNum,
+        COUNT(*) OVER (PARTITION BY K.KMID_KM_COD) AS TotalCount
+    FROM 
+        BVTA1_PJHD P
+    INNER JOIN BVTA1_KMID K
+        ON P.PJHD_KM_COD = K.KMID_KM_COD
+        AND P.PJHD_KM_TEK_STR_YM = K.KMID_TEK_STR_YM
+        AND P.PJHD_KM_EBS_OBN = K.KMID_EBS_OBN
+        AND P.PJHD_KHA_COD = K.KMID_KHA_COD
+        AND P.PJHD_KHA_COD = '20512'
+) sub;
