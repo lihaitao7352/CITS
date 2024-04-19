@@ -40,3 +40,7 @@ FROM (
         AND P.PJHD_KHA_COD = K.KMID_KHA_COD
     WHERE P.PJHD_KHA_COD = '20512'
 )
+--------------------------------
+KMID_TEK_STR_YM
+
+PJHD_KM_TEK_STR_YM
