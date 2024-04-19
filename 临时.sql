@@ -44,3 +44,53 @@ FROM (
 KMID_TEK_STR_YM
 
 PJHD_KM_TEK_STR_YM
+
+
+------------
+SELECT
+    KMID_KM_COD,
+    KMID_TEK_STR_YM,
+    KMID_TEK_END_YM,
+    KMID_EBS_OBN,
+    KMID_SIY_FLG,
+    KMID_KM_KJM,
+    PJHD_PJ_COD,
+    PJHD_KM_COD,
+    PJHD_KM_TEK_STR_YM,
+    PJHD_KM_EBS_OBN,
+    PJHD_SIY_FLG,
+    PJHD_PJ_KJM,
+    CASE 
+        WHEN TotalCount = 1 THEN 0
+        ELSE RowNum
+    END AS RowNumber,
+    CASE
+        WHEN K.KMID_TEK_STR_YM = P.PJHD_KM_TEK_STR_YM THEN 'N'
+        ELSE 'B'
+    END AS MatchFlag
+FROM (
+    SELECT
+        K.KMID_KM_COD,
+        K.KMID_TEK_STR_YM,
+        K.KMID_TEK_END_YM,
+        K.KMID_EBS_OBN,
+        K.KMID_SIY_FLG,
+        K.KMID_KM_KJM,
+        P.PJHD_PJ_COD,
+        P.PJHD_KM_COD,
+        P.PJHD_KM_TEK_STR_YM,
+        P.PJHD_KM_EBS_OBN,
+        P.PJHD_SIY_FLG,
+        P.PJHD_PJ_KJM,
+        ROW_NUMBER() OVER (PARTITION BY K.KMID_KM_COD ORDER BY P.PJHD_PJ_COD) AS RowNum,
+        COUNT(*) OVER (PARTITION BY K.KMID_KM_COD) AS TotalCount
+    FROM 
+        BVTA1_PJHD P
+    INNER JOIN BVTA1_KMID K
+        ON P.PJHD_KM_COD = K.KMID_KM_COD
+        AND P.PJHD_KM_TEK_STR_YM = K.KMID_TEK_STR_YM
+        AND P.PJHD_KM_EBS_OBN = K.KMID_EBS_OBN
+        AND P.PJHD_KHA_COD = K.KMID_KHA_COD
+    WHERE P.PJHD_KHA_COD = '20512'
+) sub;
+
