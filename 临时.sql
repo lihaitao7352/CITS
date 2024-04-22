@@ -62,3 +62,71 @@ WHERE
     JPTD.JPTD_SNI_TRH_KBN = '00'
 ORDER BY
     JPTD.JPTD_PJ_COD, JPTD.JPTD_JYS_VER_RBN, JPTD.JPTD_SNI_TRH_KBN
+
+
+--min/maxの方法NG列だけ取得
+WITH GroupCheck AS (
+    SELECT
+        JPTD.JPTD_PJ_COD,
+        JPTD.JPTD_JYS_VER_RBN,
+        JPTD.JPTD_SNI_TRH_KBN,
+        MIN(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Min_KBN,
+        MAX(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Max_KBN
+    FROM
+        BGTA3_JPTD JPTD
+),
+Verifications AS (
+    SELECT
+        GC.JPTD_PJ_COD,
+        GC.JPTD_JYS_VER_RBN,
+        GC.JPTD_SNI_TRH_KBN,
+        CASE WHEN GC.Min_KBN = GC.Max_KBN THEN 1 ELSE 0 END AS IsUniform
+    FROM
+        GroupCheck GC
+),
+FinalResults AS (
+    SELECT
+        V.JPTD_PJ_COD,
+        V.JPTD_JYS_VER_RBN,
+        V.JPTD_SNI_TRH_KBN,
+        CASE WHEN MIN(V.IsUniform) OVER (PARTITION BY V.JPTD_PJ_COD) = 1 THEN 'OK' ELSE 'NG' END AS 判断列
+    FROM
+        Verifications V
+)
+SELECT
+    F.JPTD_PJ_COD,
+    F.JPTD_JYS_VER_RBN,
+    F.JPTD_SNI_TRH_KBN,
+    F.判断列
+FROM
+    FinalResults F
+WHERE
+    F.判断列 = 'NG'
+ORDER BY
+    F.JPTD_PJ_COD,
+    F.JPTD_JYS_VER_RBN,
+    F.JPTD_SNI_TRH_KBN
+-----------------------DISTINCTの方法NG列だけ取得
+WITH ConsistencyCheck AS (
+    SELECT
+        JPTD.JPTD_PJ_COD,
+        COUNT(DISTINCT JPTD.JPTD_SNI_TRH_KBN) AS UniqueCount
+    FROM
+        BGTA3_JPTD JPTD
+    GROUP BY
+        JPTD.JPTD_PJ_COD
+)
+SELECT
+    JPTD.JPTD_PJ_COD,
+    JPTD.JPTD_JYS_VER_RBN,
+    JPTD.JPTD_SNI_TRH_KBN,
+    CASE WHEN CC.UniqueCount = 1 THEN 'OK' ELSE 'NG' END AS 判断列
+FROM
+    BGTA3_JPTD JPTD
+JOIN
+    ConsistencyCheck CC ON JPTD.JPTD_PJ_COD = CC.JPTD_PJ_COD
+WHERE
+    JPTD.JPTD_SNI_TRH_KBN = '00' AND CC.UniqueCount > 1
+ORDER BY
+    JPTD.JPTD_PJ_COD, JPTD.JPTD_JYS_VER_RBN, JPTD.JPTD_SNI_TRH_KBN
+
