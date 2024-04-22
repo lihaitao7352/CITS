@@ -99,4 +99,46 @@ ORDER BY
     SC.JPTD_PJ_COD,
     SC.JPTD_JYS_VER_RBN,
     SC.JPTD_SNI_TRH_KBN
+----------------------------------
+WITH GroupCheck AS (
+    SELECT
+        JPTD.JPTD_PJ_COD,
+        JPTD.JPTD_JYS_VER_RBN,
+        JPTD.JPTD_SNI_TRH_KBN,
+        -- 计算当前行的前一个JYS_VER_RBN值
+        LAG(JPTD.JPTD_JYS_VER_RBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD ORDER BY JPTD.JPTD_JYS_VER_RBN) AS Prev_VER,
+        -- 检查分组内所有SNI_TRH_KBN是否一致
+        MIN(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Min_KBN,
+        MAX(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Max_KBN
+    FROM
+        BGTA3_JPTD JPTD
+    WHERE
+        JPTD.JPTD_SNI_TRH_KBN = '00'
+),
+Verifications AS (
+    SELECT
+        GC.JPTD_PJ_COD,
+        GC.JPTD_JYS_VER_RBN,
+        GC.JPTD_SNI_TRH_KBN,
+        -- 判断是否连番
+        CASE WHEN GC.Prev_VER IS NULL OR GC.JPTD_JYS_VER_RBN = GC.Prev_VER + 1 THEN 1 ELSE 0 END AS IsSequential,
+        -- 判断SNI_TRH_KBN是否一致
+        CASE WHEN GC.Min_KBN = GC.Max_KBN THEN 1 ELSE 0 END AS IsUniform
+    FROM
+        GroupCheck GC
+)
+SELECT
+    V.JPTD_PJ_COD,
+    V.JPTD_JYS_VER_RBN,
+    V.JPTD_SNI_TRH_KBN,
+    -- 如果所有行都满足连番且SNI_TRH_KBN一致，则标记OK，否则标记NG
+    CASE WHEN MIN(V.IsSequential) OVER (PARTITION BY V.JPTD_PJ_COD) = 1
+             AND MIN(V.IsUniform) OVER (PARTITION BY V.JPTD_PJ_COD) = 1
+         THEN 'OK' ELSE 'NG' END AS 判断列
+FROM
+    Verifications V
+ORDER BY
+    V.JPTD_PJ_COD,
+    V.JPTD_JYS_VER_RBN,
+    V.JPTD_SNI_TRH_KBN
 
