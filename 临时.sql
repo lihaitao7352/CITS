@@ -35,3 +35,33 @@ ORDER BY
 リスト		VER	社内取引	
 	12456	1	00	
 		2	10	
+
+
+--------------
+WITH RankedProjects AS (
+    SELECT
+        JPTD.JPTD_PJ_COD,
+        JPTD.JPTD_JYS_VER_RBN,
+        JPTD.JPTD_SNI_TRH_KBN,
+        ROW_NUMBER() OVER (PARTITION BY JPTD.JPTD_PJ_COD ORDER BY JPTD.JPTD_JYS_VER_RBN) AS Rank
+    FROM
+        BGTA3_JPTD JPTD
+    WHERE
+        JPTD.JPTD_SNI_TRH_KBN = '00'
+)
+SELECT
+    SUBSTR(JPTD.JPTD_PJ_COD, 1, 9) AS PJ_COD_Short,
+    JPTD.JPTD_PJ_COD,
+    JPTD.JPTD_JYS_VER_RBN,
+    JPTD.JPTD_SNI_TRH_KBN,
+    CASE
+        WHEN Rank = 1 THEN 'OK'
+        ELSE 'NG'
+    END AS 判断列
+FROM
+    RankedProjects
+ORDER BY
+    PJ_COD_Short,
+    JPTD.JPTD_PJ_COD,
+    JPTD.JPTD_JYS_VER_RBN,
+    JPTD.JPTD_SNI_TRH_KBN
