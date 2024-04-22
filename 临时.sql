@@ -50,18 +50,18 @@ WITH RankedProjects AS (
         JPTD.JPTD_SNI_TRH_KBN = '00'
 )
 SELECT
-    SUBSTR(JPTD.JPTD_PJ_COD, 1, 9) AS PJ_COD_Short,
-    JPTD.JPTD_PJ_COD,
-    JPTD.JPTD_JYS_VER_RBN,
-    JPTD.JPTD_SNI_TRH_KBN,
+    SUBSTR(RankedProjects.JPTD_PJ_COD, 1, 9) AS PJ_COD_Short,
+    RankedProjects.JPTD_PJ_COD,
+    RankedProjects.JPTD_JYS_VER_RBN,
+    RankedProjects.JPTD_SNI_TRH_KBN,
     CASE
-        WHEN Rank = 1 THEN 'OK'
+        WHEN RankedProjects.Rank = 1 THEN 'OK'
         ELSE 'NG'
     END AS 判断列
 FROM
     RankedProjects
 ORDER BY
     PJ_COD_Short,
-    JPTD.JPTD_PJ_COD,
-    JPTD.JPTD_JYS_VER_RBN,
-    JPTD.JPTD_SNI_TRH_KBN
+    RankedProjects.JPTD_PJ_COD,
+    RankedProjects.JPTD_JYS_VER_RBN,
+    RankedProjects.JPTD_SNI_TRH_KBN
