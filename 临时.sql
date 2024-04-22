@@ -142,3 +142,53 @@ ORDER BY
     V.JPTD_JYS_VER_RBN,
     V.JPTD_SNI_TRH_KBN
 
+----------------------------------------
+/**********仕様**********
+プロジェクトVER	社内取引	
+	12345	1	　　　00	OK
+	12345	2	　　　00	
+
+	12456	1	　　　00	NG
+	12456	2	　　　10	
+リスト		VER	社内取引	
+	12456	1	00	
+		2	10	
+テーブル名：実行予算・プロジェクト情報（BGTA3_JPTD）
+
+※VER の連番の条件が必要がありません
+
+*/
+WITH GroupCheck AS (
+    SELECT
+        JPTD.JPTD_PJ_COD,
+        JPTD.JPTD_JYS_VER_RBN,
+        JPTD.JPTD_SNI_TRH_KBN,
+        -- グループ内のすべての SNI_TRH_KBN が一致しているかどうかを確認します--条件の説明正しいです
+        MIN(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Min_KBN,
+        MAX(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Max_KBN
+    FROM
+        BGTA3_JPTD JPTD
+),
+Verifications AS (
+    SELECT
+        GC.JPTD_PJ_COD,
+        GC.JPTD_JYS_VER_RBN,
+        GC.JPTD_SNI_TRH_KBN,
+        CASE WHEN GC.Min_KBN = GC.Max_KBN THEN 1 ELSE 0 END AS IsUniform
+    FROM
+        GroupCheck GC
+)
+SELECT
+    V.JPTD_PJ_COD,
+    V.JPTD_JYS_VER_RBN,
+    V.JPTD_SNI_TRH_KBN,
+    -- SNI_TRH_KBN が一貫している場合は OK をマークし、それ以外の場合は NG をマークします
+    CASE WHEN MIN(V.IsUniform) OVER (PARTITION BY V.JPTD_PJ_COD) = 1-- 
+         THEN 'OK' ELSE 'NG' END AS 判断列
+FROM
+    Verifications V
+ORDER BY
+    V.JPTD_PJ_COD,
+    V.JPTD_JYS_VER_RBN,
+    V.JPTD_SNI_TRH_KBN
+
