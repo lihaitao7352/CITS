@@ -784,3 +784,7 @@ SELECT * FROM ALL_SYNONYMS WHERE SYNONYM_NAME = 'STATS$BG_EVENT_SUMMARY';
 - 如果您不确定如何执行这些查询或没有足够的权限，请联系您的数据库管理员。
 
 这些步骤应该可以帮助您确认数据库用户的权限情况，以确保用户可以在工具中正确查看和操作同义词。
+-------
+CREATE SYNONYM my_orders FOR sales.orders;
+
+CREATE PUBLIC SYNONYM all_orders FOR sales.orders;
