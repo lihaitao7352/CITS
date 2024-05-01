@@ -53,3 +53,7 @@ SELECT * FROM all_tables WHERE table_name = 'your_table_name';
 ```
 
 これらのステップに従って、一次準備工程を進めることができます。何か不明な点や追加で必要な情報があれば教えてください。
+
+
+
+=NOT(ISERROR(MATCH(A2, Sheet2!A:A, 0)))
