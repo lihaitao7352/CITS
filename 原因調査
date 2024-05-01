@@ -586,3 +586,62 @@ SYNONYM	STATSPACK
 TABLE	BGTB1_GKGD_OLD2
 TABLE	SYS_IMPORT_TABLE_02
 
+
+
+以下は、SBX40環境に存在し、SBX環境にはないとされたインデックス、LOB、シーケンス、同義語、およびテーブルに関するSQL文の例です。これらは一般的な形式であり、具体的なテーブル構造やインデックス定義に基づいて調整が必要です。
+
+### インデックスの作成 (CREATE INDEX)
+
+```sql
+CREATE INDEX BCTC1_SJRDP01 ON tablename(columnname);
+CREATE INDEX BCTZZ_DNPHI01 ON tablename(columnname);
+CREATE INDEX BCTZZ_DNPHI02 ON tablename(columnname);
+-- 以下同様、各インデックスに対応するテーブル名とカラム名を指定
+```
+
+### 大オブジェクト (LOB)
+
+LOBフィールドは既存のテーブルに追加することが一般的ですが、ここでは新しいテーブルにLOBカラムを含むテーブルを作成する例を示します。
+
+```sql
+CREATE TABLE example_table (
+    id INT,
+    data BLOB,
+    CONSTRAINT pk_example PRIMARY KEY (id)
+);
+```
+
+### シーケンスの作成 (CREATE SEQUENCE)
+
+```sql
+CREATE SEQUENCE BCEZZ_SG1ID START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE BCEZZ_SG2ID START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE BCEZZ_SG3ID START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE BCEZZ_SG4ID START WITH 1 INCREMENT BY 1;
+```
+
+### 同義語の作成 (CREATE SYNONYM)
+
+```sql
+CREATE SYNONYM STATS$BG_EVENT_SUMMARY FOR tablename;
+CREATE SYNONYM STATS$BUFFERED_QUEUES FOR tablename;
+-- 以下同様、各同義語に対応する実際のオブジェクト名を指定
+```
+
+### テーブルの作成 (CREATE TABLE)
+
+```sql
+CREATE TABLE BGTB1_GKGD_OLD2 (
+    column1 TYPE,
+    column2 TYPE,
+    -- その他のカラム定義
+);
+
+CREATE TABLE SYS_IMPORT_TABLE_02 (
+    column1 TYPE,
+    column2 TYPE,
+    -- その他のカラム定義
+);
+```
+
+これらのSQLスクリプトは、実際のテーブル構造やインデックス設定に基づいて調整する必要があります。LOBやシーケンスの具体的な用途や設定に関しては、さらに詳細情報が必要です。また、システム生成のオブジェクト（SYSやSTATSで始まる名前）については、通常はデータベース管理者またはシステム管理者の指導のもとで管理されるため、操作には特別な注意が必要です。これらのオブジェクトの作成や変更には、実際のシステム構成やビジネスルールに基づく慎重な検討が求められます。
