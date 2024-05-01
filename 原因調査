@@ -376,6 +376,91 @@ VIEW	BVVG1_GHHD
 VIEW	BVVG1_GHKD
 VIEW	BXVA1_KIOR
 VIEW	BXVA1_WFKD
+--------------------------------------------------------------------------------------------------------------------------
+SBX40環境に存在するが、SBX環境にはないオブジェクトを作成するためのSQL文を作成する手順は以下の通りです。具体的なフィールド定義やインデックス構成が不明なため、基本的な構文のみを提供します。実際の環境に合わせて適宜調整が必要です。
+
+### インデックス (INDEX)
+
+インデックス作成の基本的なSQLは次のようになります。対象となるテーブル名とカラム名が必要です。
+
+```sql
+CREATE INDEX インデックス名 ON テーブル名(カラム名);
+```
+
+例：
+
+```sql
+CREATE INDEX BCTC1_SJRDP01 ON some_table(column1);
+CREATE INDEX BCTZZ_DNPHI01 ON another_table(column2);
+-- 以下同様
+```
+
+### 大オブジェクト (LOB)
+
+LOBフィールドは通常、テーブルの作成または変更時に定義されます。既存のテーブルにLOBフィールドを追加する例は以下の通りです：
+
+```sql
+ALTER TABLE テーブル名 MODIFY (LOBカラム名 (STORE AS (表領域)));
+```
+
+### シーケンス (SEQUENCE)
+
+シーケンスの作成は以下の通りです：
+
+```sql
+CREATE SEQUENCE シーケンス名 START WITH 1 INCREMENT BY 1;
+```
+
+例：
+
+```sql
+CREATE SEQUENCE BCEZZ_SG1ID START WITH 1 INCREMENT BY 1;
+-- 以下同様
+```
+
+### 同義語 (SYNONYM)
+
+同義語の作成方法は次の通りです：
+
+```sql
+CREATE SYNONYM 同義語名 FOR 対象オブジェクト;
+```
+
+例：
+
+```sql
+CREATE SYNONYM STATS$BG_EVENT_SUMMARY FOR actual_table_name;
+-- 以下同様
+```
+
+### テーブル (TABLE)
+
+テーブルの作成例は次の通りです。具体的なカラム定義が必要です。
+
+```sql
+CREATE TABLE テーブル名 (
+    カラム1 データ型,
+    カラム2 データ型,
+    -- その他のカラム
+);
+```
+
+例：
+
+```sql
+CREATE TABLE BGTB1_GKGD_OLD2 (
+    column1 VARCHAR2(100),
+    column2 NUMBER,
+    -- その他のカラム
+);
+CREATE TABLE SYS_IMPORT_TABLE_02 (
+    column1 VARCHAR2(100),
+    column2 DATE
+    -- その他のカラム
+);
+```
+
+これらのSQLスクリプトは、実際のテーブル構造やインデックス設定に基づいて調整する必要があります。必要な詳細情報を確認し、適切に設定を行ってください。また、システムが生成したインデックスや同義語（SYSやSTATS$で始まるもの）は、通常は手動で操作せず、システム管理者またはDBAに相談してください。
 
 SBX40	
 INDEX	BCTC1_SJRDP01
