@@ -744,3 +744,43 @@ CREATE SYNONYM STATS$BG_EVENT_SUMMARY FOR [指向的对象];
 ```
 
 确保替换 `[指向的对象]` 为同义词应指向的正确表或视图名。如果不确定具体细节，可能需要联系维护数据库的管理员或查看相关的数据库文档。
+--------------------------
+要确认您的数据库用户是否有权限查看同义词，您可以通过SQL查询检查用户的权限。这里有几种方法可以检查用户权限，具体取决于您使用的数据库类型。对于Oracle数据库，您可以使用以下方法来检查：
+
+### 1. 检查用户的系统权限
+您可以查询 `DBA_SYS_PRIVS` 视图来查看用户是否具有查看同义词的相关系统权限。这通常包括像 `SELECT ANY DICTIONARY` 或 `SELECT_CATALOG_ROLE` 这样的权限。
+
+```sql
+SELECT * FROM DBA_SYS_PRIVS WHERE GRANTEE = '您的用户名';
+```
+
+### 2. 检查角色权限
+用户可能通过角色继承了查看同义词的权限。您可以查询 `DBA_ROLE_PRIVS` 和 `ROLE_SYS_PRIVS` 来了解用户通过角色获得了哪些系统权限。
+
+```sql
+-- 查看用户被授予的角色
+SELECT * FROM DBA_ROLE_PRIVS WHERE GRANTEE = '您的用户名';
+
+-- 查看角色被授予的系统权限
+SELECT * FROM ROLE_SYS_PRIVS WHERE ROLE = '角色名';
+```
+
+### 3. 检查对象级权限
+如果用户需要查看特定同义词，还需要确保用户对同义词指向的基表或视图有足够的权限。您可以查询 `DBA_TAB_PRIVS` 查看用户是否有对应对象的访问权限。
+
+```sql
+SELECT * FROM DBA_TAB_PRIVS WHERE GRANTEE = '您的用户名' AND TABLE_NAME = '同义词指向的对象名';
+```
+
+### 4. 使用有权访问数据字典的账户查询
+如果您使用的是具有高权限的账户（如DBA），您可以直接查询 `ALL_SYNONYMS` 或 `DBA_SYNONYMS` 来查看数据库中所有同义词的信息，包括它们的所有者和对象定义。
+
+```sql
+SELECT * FROM ALL_SYNONYMS WHERE SYNONYM_NAME = 'STATS$BG_EVENT_SUMMARY';
+```
+
+### 注意：
+- 上述查询中提到的视图（如 `DBA_SYS_PRIVS`, `DBA_ROLE_PRIVS`, `ROLE_SYS_PRIVS`, `DBA_TAB_PRIVS`）通常只有数据库管理员或具有相应权限的用户才能访问。
+- 如果您不确定如何执行这些查询或没有足够的权限，请联系您的数据库管理员。
+
+这些步骤应该可以帮助您确认数据库用户的权限情况，以确保用户可以在工具中正确查看和操作同义词。
