@@ -69,43 +69,45 @@ ORDER BY
 ソート
 ①②③
 */
-WITH 最新組織属性 AS (
+WITH SSZD_NEW AS (
     SELECT DISTINCT
-        組織属性_組織_コード,
-        組織属性_組織_分類_コード
+        SSZD.SSZD_SSI_COD, --組織属性_組織_コード
+        SSZD.SSZD_SSI_BNR_COD --組織属性_組織_分類_コード
     FROM
-        組織属性定数
+        BVTB3_SSZD SSZD
     WHERE
         /* 組織属性定数テーブルの最新の日付を指定 */
 ),
-契約区分組織 AS (
+KKBD_NEW AS (
     SELECT
-        契約区分情報_組織_分類_コード
+        KKBD.KKBD_SSI_BNR_COD--契約区分情報_組織_分類_コード
     FROM
-        契約区分定数
+        BVTG1_KKBD KKBD
     WHERE
-        契約区分情報_契約_区分_コード LIKE '9%'
+        KKBD.KKBD_KEK_KBN_COD  LIKE '9%' --契約区分情報_契約_区分_コード
 )
 SELECT
-    a.会社コード,
-    a.所属コード,
-    a.プロジェクトコード,
-    a.プ想プロ情報_業務種別_コード AS プロジェクト情報業務種別コード,
-    c.業務種別情報_業務種別_コード AS 業務種別定数業務種別コード,
-    a.着手日,
-    a.完了日
+    PPJD.PPJD_KHA_COD,
+    PPJD.PPJD_SZK_COD,
+    PPJD.PPJD_PJ_COD,
+    PPJD.PPJD_GMS_COD AS プロジェクト情報業務種別コード,
+    GMSD.GMSD_GMS_COD AS 業務種別定数業務種別コード,
+    PPJD.PPJD_CKS_YMD,
+    PPJD.PPJD_KRY_YMD
 FROM
-    プロジェクト予想・プロジェクト情報 a
+    BGTA3_PPJD PPJD
 JOIN
-    最新組織属性 b ON a.プ想プロ情報_所属_コード = b.組織属性_組織_コード
+    SSZD_NEW SN ON PPJD.PPJD_SZK_COD = SN.SSZD_SSI_COD
 JOIN
-    契約区分組織 d ON b.組織属性_組織_分類_コード = d.契約区分情報_組織_分類_コード
+    KKBD_NEW KM ON SN.SSZD_SSI_BNR_COD = KN.KKBD_SSI_BNR_COD
 JOIN
-    業務種別定数 c ON c.業務種別情報_契約_区分_コード = d.契約区分情報_組織_分類_コード
+    BVTG1_GMSD GMSD ON GMSD.GMSD_KEK_KBN_COD = KN.KKBD_SSI_BNR_COD
 WHERE
-    a.プ想プロ情報_業務種別_コード != c.業務種別情報_業務種別_コード
+    PPJD.PPJD_GMS_COD <> GMSD.GMSD_GMS_COD
 ORDER BY
-    a.会社コード, a.所属コード, a.プロジェクトコード;
+    PPJD.PPJD_KHA_COD,
+    PPJD.PPJD_SZK_COD,
+    PPJD.PPJD_PJ_COD;
 /*条件3.
 【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿プロジェクト＿コード」と
 【プロジェクト情報（カレント）】の「プロカレント＿プロジェクト＿コード」をマッチングし
