@@ -1,114 +1,136 @@
-/*「JPTD_SNI_TRH_KBN」がグループ内で一貫しているかどうかを確認するために「MIN」と「MAX」を使用する必要があるかどうかについての質問に対する答えですが、確かに「MIN」と「MAX」を使用する方法は効果的です。これにより、各「JPTD_PJ_COD」グループ内での「JPTD_SNI_TRH_KBN」の最小値と最大値を計算し、これらが同じであれば、そのグループ内の全ての値が同一であると判断することができます。
+テプシスのプロジェクト予想・プロジェクト情報のプ想プロ情報＿業務種別＿コード(PPJD_GMS_COD)
+が正しいかチェックしたいのですが。
+チェックのSQLの作成をお願いします。
 
-具体的には、以下のように窓口関数を用いることで、このチェックを行うことができます。
+/*条件1.
 
-```sql
+【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿件名＿コード」(複数あり)一件に絞り
+【件名予想・件名情報】の最新バージョン(指定)の「プ予想件名情報＿件名＿コード」とマッチングして
+「プ想プロ情報＿業務種別＿コード」と「予想件名情報＿業務種別＿コード」に差異があるプロジェクトを抽出する。
+
+取得項目
+①会社コード
+②所属コード
+③プロジェクトコード
+④件名コード
+⑤業務種別コード
+⑥着手日
+⑦完了日
+
+ソート
+①②③④
 */
-WITH GroupCheck AS (
-    SELECT
-        JPTD.JPTD_PJ_COD,
-        JPTD.JPTD_JYS_VER_RBN,
-        JPTD.JPTD_SNI_TRH_KBN,
-        MIN(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Min_KBN,
-        MAX(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Max_KBN
+SELECT
+    PPJD.PPJD_KHA_COD,
+    PPJD.PPJD_SZK_COD,
+    PPJD.PPJD_PJ_COD,
+    PPJD.PPJD_KM_COD,
+    PPJD.PPJD_GMS_COD,
+    PPJD.PPJD_CKS_YMD,
+    PPJD.PPJD_KRY_YMD
+FROM
+    BGTA3_PPJD PPJD
+JOIN
+    BGTA2_SKMD SKMD ON PPJD.PPJD_KM_COD = SKMD.SKMD_KM_COD
+WHERE
+    PPJD.PPJD_GMS_COD <> SKMD.SKMD_GMS_COD
+ORDER BY
+    PPJD.PPJD_KHA_COD,
+    PPJD.PPJD_SZK_COD,
+    PPJD.PPJD_PJ_COD,
+    PPJD.PPJD_KM_COD;
+/*条件2.
+
+【プロジェクト予想・プロジェクト情報】のプ想プロ情報＿所属＿コードと
+【組織属性定数(BVTB3_SSZD)】の最新の組織属性＿組織＿コードをマッチングし組織属性＿組織＿分類＿コードを取得する。
+取得した「組織属性＿組織＿分類＿コード」と【契約区分定数(BVTG1_KKBD)】の「契約区分情報＿契約＿区分＿コード(9%)」の
+「契約区分情報＿組織＿分類＿コード」とマッチングする。マッチングしなければエラーとする。
+取得した「契約区分情報＿組織＿分類＿コード」と【業務種別定数(BVTG1_GMSD)】の「業務種別情報＿契約＿区分＿コード(GMSD_KEK_KBN_COD)」
+とマッチングして「業務種別情報＿業務種別＿コード」を取得する。
+取得した「業務種別情報＿業務種別＿コード」とプ【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿業務種別＿コード」を比較して
+アンマッチのプロジェクトを抽出する。
+
+取得項目
+①会社コード
+②所属コード
+③プロジェクトコード
+④プロジェクト予想・プロジェクト情報/業務種別コード　
+⑤業務種別定数/業務種別コード
+⑥着手日
+⑦完了日
+
+ソート
+①②③
+*/
+WITH 最新組織属性 AS (
+    SELECT DISTINCT
+        組織属性_組織_コード,
+        組織属性_組織_分類_コード
     FROM
-        BGTA3_JPTD JPTD
+        組織属性定数
+    WHERE
+        /* 組織属性定数テーブルの最新の日付を指定 */
 ),
-Verifications AS (
+契約区分組織 AS (
     SELECT
-        GC.JPTD_PJ_COD,
-        GC.JPTD_JYS_VER_RBN,
-        GC.JPTD_SNI_TRH_KBN,
-        CASE WHEN GC.Min_KBN = GC.Max_KBN THEN 1 ELSE 0 END AS IsUniform
+        契約区分情報_組織_分類_コード
     FROM
-        GroupCheck GC
+        契約区分定数
+    WHERE
+        契約区分情報_契約_区分_コード LIKE '9%'
 )
 SELECT
-    V.JPTD_PJ_COD,
-    V.JPTD_JYS_VER_RBN,
-    V.JPTD_SNI_TRH_KBN,
-    CASE WHEN MIN(V.IsUniform) OVER (PARTITION BY V.JPTD_PJ_COD) = 1 THEN 'OK' ELSE 'NG' END AS 判断列
+    a.会社コード,
+    a.所属コード,
+    a.プロジェクトコード,
+    a.プ想プロ情報_業務種別_コード AS プロジェクト情報業務種別コード,
+    c.業務種別情報_業務種別_コード AS 業務種別定数業務種別コード,
+    a.着手日,
+    a.完了日
 FROM
-    Verifications V
+    プロジェクト予想・プロジェクト情報 a
+JOIN
+    最新組織属性 b ON a.プ想プロ情報_所属_コード = b.組織属性_組織_コード
+JOIN
+    契約区分組織 d ON b.組織属性_組織_分類_コード = d.契約区分情報_組織_分類_コード
+JOIN
+    業務種別定数 c ON c.業務種別情報_契約_区分_コード = d.契約区分情報_組織_分類_コード
+WHERE
+    a.プ想プロ情報_業務種別_コード != c.業務種別情報_業務種別_コード
 ORDER BY
-    V.JPTD_PJ_COD,
-    V.JPTD_JYS_VER_RBN,
-    V.JPTD_SNI_TRH_KBN
-/*
-このクエリでは、各プロジェクトコード（JPTD_PJ_COD）に対して最小値と最大値を計算し、
-それらが一致するかどうかで全てのレコードが「OK」または「NG」と判断されます。これにより、グループ内の一貫性を簡単に確認できます。
-また、他の方法としては、DISTINCT キーワードを使ったサブクエリを用いて特定の列の値がグループ内で一意かどうかをカウントする方法もありますが、`MIN` と `MAX` を使う方法の方がシンプルで効率的です。
+    a.会社コード, a.所属コード, a.プロジェクトコード;
+/*条件3.
+【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿プロジェクト＿コード」と
+【プロジェクト情報（カレント）】の「プロカレント＿プロジェクト＿コード」をマッチングし
+「プ想プロ情報＿業務種別＿コード」と「プロカレント＿業務種別＿コード」に差異があるプロジェクトを抽出する。
+
+取得項目
+①会社コード
+②所属コード
+③プロジェクトコード
+④プロジェクト予想・プロジェクト情報/業務種別コード　
+⑤プロジェクト情報（カレント）/業務種別コード
+⑥着手日
+⑦完了日
+
+ソート
+
+①②③
+どちらかの一方にある場合は差異とする。
 */
-
-WITH ConsistencyCheck AS (
-    SELECT
-        JPTD.JPTD_PJ_COD,
-        COUNT(DISTINCT JPTD.JPTD_SNI_TRH_KBN) AS UniqueCount
-    FROM
-        BGTA3_JPTD JPTD
-    GROUP BY
-        JPTD.JPTD_PJ_COD
-)
 SELECT
-    JPTD.JPTD_PJ_COD,
-    JPTD.JPTD_JYS_VER_RBN,
-    JPTD.JPTD_SNI_TRH_KBN,
-    CASE WHEN CC.UniqueCount = 1 THEN 'OK' ELSE 'NG' END AS 判断列
+    a.会社コード,
+    a.所属コード,
+    a.プロジェクトコード,
+    a.プ想プロ情報_業務種別_コード AS 予想業務種別コード,
+    b.プロカレント_業務種別_コード AS 現在業務種別コード,
+    a.着手日,
+    a.完了日
 FROM
-    BGTA3_JPTD JPTD
+    プロジェクト予想・プロジェクト情報 a
 JOIN
-    ConsistencyCheck CC ON JPTD.JPTD_PJ_COD = CC.JPTD_PJ_COD
+    プロジェクト情報（カレント） b ON a.プ想プロ情報_プロジェクト_コード = b.プロカレント_プロジェクト_コード
 WHERE
-    JPTD.JPTD_SNI_TRH_KBN = '00'
+    a.プ想プロ情報_業務種別_コード != b.プロカレント_業務種別_コード
 ORDER BY
-    JPTD.JPTD_PJ_COD, JPTD.JPTD_JYS_VER_RBN, JPTD.JPTD_SNI_TRH_KBN
-
-
--------------------------------min/maxの方法NG列だけ取得
-WITH GroupCheck AS (
-    SELECT
-        JPTD.JPTD_PJ_COD,
-        JPTD.JPTD_JYS_VER_RBN,
-        JPTD.JPTD_SNI_TRH_KBN,
-        MIN(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Min_KBN,
-        MAX(JPTD.JPTD_SNI_TRH_KBN) OVER (PARTITION BY JPTD.JPTD_PJ_COD) AS Max_KBN
-    FROM
-        BGTA3_JPTD JPTD
-)
-SELECT
-    GC.JPTD_PJ_COD,
-    GC.JPTD_JYS_VER_RBN,
-    GC.JPTD_SNI_TRH_KBN
-FROM
-    GroupCheck GC
-WHERE
-    GC.Min_KBN != GC.Max_KBN -- Only groups with non-uniform JPTD_SNI_TRH_KBN are selected
-ORDER BY
-    GC.JPTD_PJ_COD,
-    GC.JPTD_JYS_VER_RBN,
-    GC.JPTD_SNI_TRH_KBN
-
------------------------DISTINCTの方法NG列だけ取得
-WITH ConsistencyCheck AS (
-    SELECT
-        JPTD.JPTD_PJ_COD,
-        COUNT(DISTINCT JPTD.JPTD_SNI_TRH_KBN) AS UniqueCount
-    FROM
-        BGTA3_JPTD JPTD
-    GROUP BY
-        JPTD.JPTD_PJ_COD
-)
-SELECT
-    JPTD.JPTD_PJ_COD,
-    JPTD.JPTD_JYS_VER_RBN,
-    JPTD.JPTD_SNI_TRH_KBN
-FROM
-    BGTA3_JPTD JPTD
-JOIN
-    ConsistencyCheck CC ON JPTD.JPTD_PJ_COD = CC.JPTD_PJ_COD
-WHERE
-    CC.UniqueCount > 1
-ORDER BY
-    JPTD.JPTD_PJ_COD, JPTD.JPTD_JYS_VER_RBN, JPTD.JPTD_SNI_TRH_KBN
-
-
+    a.会社コード, a.所属コード, a.プロジェクトコード;
