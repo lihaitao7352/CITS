@@ -62,9 +62,8 @@ ORDER BY
     PPJD.PPJD_KHA_COD,
     PPJD.PPJD_SZK_COD,
     PPJD.PPJD_PJ_COD;
+----------------------------------------------------------------------------------------------------------------------------
 
-
----- 最新の組織属性コードと分類コードを取得
 WITH SSZD_NEW AS (
     SELECT
         SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
@@ -78,7 +77,6 @@ WITH SSZD_NEW AS (
             WHERE SZD.SSZD_SSI_COD = SSZD.SSZD_SSI_COD
         )
 ),
--- 契約区分情報_組織_分類_コードの取得
 KKBD_NEW AS (
     SELECT
         KKBD.KKBD_SSI_BNR_COD, -- 契約区分情報_組織_分類_コード
@@ -88,15 +86,12 @@ KKBD_NEW AS (
     WHERE
         KKBD.KKBD_KEK_KBN_COD LIKE '9%'
 ),
--- 業務種別情報の取得
 GMSD_NEW AS (
     SELECT
         GMSD.GMSD_KEK_KBN_COD, -- 業務種別情報_契約_区分_コード
         GMSD.GMSD_GMS_COD -- 業務種別情報_業務種別_コード
     FROM
         BVTG1_GMSD GMSD
-    WHERE
-        GMSD.GMSD_KEK_KBN_COD IN (SELECT KKBD_KEK_KBN_COD FROM KKBD_NEW)
 )
 
 SELECT
