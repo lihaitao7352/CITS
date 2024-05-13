@@ -1,3 +1,4 @@
+--sql1
 WITH SSZD_NEW AS (
     SELECT
         SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
@@ -52,6 +53,7 @@ ORDER BY
 
 
 ---------------------------
+--sql2
 WITH SSZD_NEW AS (
 SELECT
     SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
