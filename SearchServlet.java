@@ -36,20 +36,40 @@ public class SearchServlet extends HttpServlet {
         try (Connection conn = DriverManager.getConnection(url, user, password);
              Statement stmt = conn.createStatement()) {
 
-            // 初期結果を取得
-            String query = "SELECT * FROM initial_results";
+            // SQL 查询语句
+            String query = "SELECT " +
+                                "SKMD.SKMD_KM_COD, " +
+                                "AKND.AKND_AKN_MSY, " +
+                                "SKMD.SKMD_SZK_COD, " +
+                                "SKMD.SKMD_CKS_YMD, " +
+                                "SKMD.SKMD_KRY_YMD, " +
+                                "YKMD.YKMD_CKS_YMD, " +
+                                "YKMD.YKMD_KRY_YMD " +
+                           "FROM " +
+                                "BGTA2_SKMD SKMD " +
+                                "JOIN BGTA3_AKND AKND ON SKMD.SKMD_KHA_COD = AKND.AKND_KHA_COD " +
+                                    "AND SKMD.SKMD_SZK_COD = AKND.AKND_SZK_COD " +
+                                    "AND SKMD.SKMD_KM_COD = AKND.AKND_KM_COD " +
+                                "LEFT JOIN BGTA1_YKMD YKMD ON SKMD.SKMD_KHA_COD = YKMD.YKMD_KHA_COD " +
+                                    "AND SKMD.SKMD_SZK_COD = YKMD.YKMD_SZK_COD " +
+                                    "AND SKMD.SKMD_KM_COD = YKMD.YKMD_KM_COD " +
+                                    "AND YKMD.YKMD_KBY_VER_ID = (SELECT MAX(YKMD_KBY_VER_ID) FROM BGTA1_YKMD WHERE YKMD_KHA_COD = SKMD.SKMD_KHA_COD) " +
+                           "WHERE " +
+                                "SKMD.SKMD_KBS_VER_ID = (SELECT MAX(SKMD_KBS_VER_ID) FROM BGTA2_SKMD WHERE SKMD_KHA_COD = SKMD.SKMD_KHA_COD)";
+            
+            // 执行查询
             ResultSet rs = stmt.executeQuery(query);
 
             while (rs.next()) {
                 // 結果をオブジェクトに変換してリストに追加
                 Result result = new Result(
-                    rs.getString("件名コード"),
-                    rs.getString("件名名称"),
-                    rs.getString("組織"),
-                    rs.getString("予想着手日"),
-                    rs.getString("予想完了日"),
-                    rs.getString("予算着手日"),
-                    rs.getString("予算完了日")
+                    rs.getString("SKMD_KM_COD"),
+                    rs.getString("AKND_AKN_MSY"),
+                    rs.getString("SKMD_SZK_COD"),
+                    rs.getString("SKMD_CKS_YMD"),
+                    rs.getString("SKMD_KRY_YMD"),
+                    rs.getString("YKMD_CKS_YMD"),
+                    rs.getString("YKMD_KRY_YMD")
                 );
                 initialResults.add(result);
             }
