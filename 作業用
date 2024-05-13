@@ -97,3 +97,5 @@ ORDER BY
     PPJD.PPJD_KHA_COD,
     PPJD.PPJD_SZK_COD,
     PPJD.PPJD_PJ_COD
+
+在si object 中sql1的执行结果会有一个弹窗，而sql2直接出现查询结果
