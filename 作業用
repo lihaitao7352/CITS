@@ -64,3 +64,62 @@ ORDER BY
     PPJD.PPJD_KHA_COD,
     PPJD.PPJD_SZK_COD,
     PPJD.PPJD_PJ_COD;
+-------------
+DECLARE
+    -- 变量定义，用于存储查询结果
+    v_company_code BGTA3_PPJD.PPJD_KHA_COD%TYPE;
+    v_dept_code BGTA3_PPJD.PPJD_SZK_COD%TYPE;
+    v_project_code BGTA3_PPJD.PPJD_PJ_COD%TYPE;
+    v_industry_code BGTA3_PPJD.PPJD_GMS_COD%TYPE;
+    v_const_industry_code BVTG1_GMSD.GMSD_GMS_COD%TYPE;
+    v_start_date BGTA3_PPJD.PPJD_CKS_YMD%TYPE;
+    v_end_date BGTA3_PPJD.PPJD_KRY_YMD%TYPE;
+    cursor_not_found EXCEPTION;
+BEGIN
+    FOR rec IN (
+        WITH SSZD_NEW AS (
+            SELECT SSZD.SSZD_SSI_COD, SSZD.SSZD_SSI_BNR_COD
+            FROM BVTB3_SSZD SSZD
+            WHERE SSZD.SSZD_TEK_STR_YM = (
+                SELECT MAX(SZD.SSZD_TEK_STR_YM)
+                FROM BVTB3_SSZD SZD
+                WHERE SZD.SSZD_SSI_COD = SSZD.SSZD_SSI_COD
+            )
+        ),
+        KKBD_NEW AS (
+            SELECT KKBD.KKBD_SSI_BNR_COD
+            FROM BVTG1_KKBD KKBD
+            WHERE KKBD.KKBD_KEK_KBN_COD LIKE '9%'
+        )
+        SELECT
+            PPJD.PPJD_KHA_COD AS 会社コード,
+            PPJD.PPJD_SZK_COD AS 所属コード,
+            PPJD.PPJD_PJ_COD AS プロジェクトコード,
+            PPJD.PPJD_GMS_COD AS プ業種コード,
+            GMSD.GMSD_GMS_COD AS 業種定数業別コード,
+            PPJD.PPJD_CKS_YMD AS 着手日,
+            PPJD.PPJD_KRY_YMD AS 完了日
+        FROM
+            BGTA3_PPJD PPJD
+        JOIN
+            SSZD_NEW ON PPJD.PPJD_SZK_COD = SSZD_NEW.SSZD_SSI_COD
+        JOIN
+            KKBD_NEW ON SSZD_NEW.SSZD_SSI_BNR_COD = KKBD_NEW.KKBD_SSI_BNR_COD
+        JOIN
+            BVTG1_GMSD GMSD ON KKBD_NEW.KKBD_SSI_BNR_COD = GMSD.GMSD_KEK_KBN_COD
+        WHERE
+            PPJD.PPJD_GMS_COD <> GMSD.GMSD_GMS_COD
+    ) LOOP
+        -- 检查是否存在不匹配的项
+        IF rec.プ業種コード IS NULL THEN
+            RAISE cursor_not_found;
+        END IF;
+
+        -- 正常处理逻辑，例如输出日志
+        DBMS_OUTPUT.PUT_LINE('会社コード: ' || rec.会社コード || ', プロジェクトコード: ' || rec.プロジェクトコード);
+    END LOOP;
+
+    EXCEPTION
+        WHEN cursor_not_found THEN
+            RAISE_APPLICATION_ERROR(-20002, 'プロジェクトの業務種別コードが見つかりませんでした。');
+END;
