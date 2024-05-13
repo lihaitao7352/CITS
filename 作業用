@@ -1,3 +1,25 @@
+【プロジェクト予想・プロジェクト情報】のプ想プロ情報＿所属＿コードと
+【組織属性定数(BVTB3_SSZD)】の最新の組織属性＿組織＿コードをマッチングし組織属性＿組織＿分類＿コードを取得する。
+取得した「組織属性＿組織＿分類＿コード」と【契約区分定数(BVTG1_KKBD)】の「契約区分情報＿契約＿区分＿コード(9%)」の
+「契約区分情報＿組織＿分類＿コード」とマッチングする。マッチングしなければエラーとする。
+
+取得した「契約区分情報＿組織＿分類＿コード」と【業務種別定数(BVTG1_GMSD)】の「業務種別情報＿契約＿区分＿コード(GMSD_KEK_KBN_COD)」
+とマッチングして「業務種別情報＿業務種別＿コード」を取得する。
+
+取得した「業務種別情報＿業務種別＿コード」とプ【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿業務種別＿コード」を比較して
+アンマッチのプロジェクトを抽出する。
+取得項目
+①会社コード
+②所属コード
+③プロジェクトコード
+④プロジェクト予想・プロジェクト情報/業務種別コード　
+⑤業務種別定数/業務種別コード
+⑥着手日
+⑦完了日
+ソート
+①②③
+*/
+--【組織属性定数(BVTB3_SSZD)】の最新の組織属性＿組織＿コードをマッチングし組織属性＿組織＿分類＿コードを取得する。
 WITH SSZD_NEW AS (
 SELECT
     SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
@@ -11,7 +33,6 @@ WHERE
         WHERE SZD.SSZD_SSI_COD = SSZD.SSZD_SSI_COD
     )
 ),
---【契約区分定数(BVTG1_KKBD)】の「契約区分情報＿契約＿区分＿コード(9%)」の「契約区分情報＿組織＿分類＿コード」
 KKBD_NEW AS (
     SELECT
         KKBD.KKBD_SSI_BNR_COD -- 契約区分情報_組織_分類_コード
@@ -19,23 +40,13 @@ KKBD_NEW AS (
         BVTG1_KKBD KKBD
     WHERE
         KKBD.KKBD_KEK_KBN_COD LIKE '9%'
-),
-GMSD_NEW AS (
-    SELECT
-        GMSD.GMSD_SSI_BNR_COD, -- 業務種別情報_組織_分類_コード
-        GMSD.GMSD_GMS_COD -- 業務種別情報_業務種別_コード
-    FROM
-        BVTG1_GMSD GMSD
-    WHERE
-        GMSD.GMSD_KEK_KBN_COD = (SELECT KKBD.KKBD_KEK_KBN_COD FROM KKBD_NEW KKBD)
 )
-
 SELECT
     PPJD.PPJD_KHA_COD AS 会社コード,
     PPJD.PPJD_SZK_COD AS 所属コード,
     PPJD.PPJD_PJ_COD AS プロジェクトコード,
-    PPJD.PPJD_GMS_COD AS プロ情業種コード,
-    GMSD.GMSD_GMS_COD AS 業種定数コード,
+    PPJD.PPJD_GMS_COD AS プ業種コード,
+    GMSD.GMSD_GMS_COD AS 業種定数業別コード,
     PPJD.PPJD_CKS_YMD AS 着手日,
     PPJD.PPJD_KRY_YMD AS 完了日
 FROM
@@ -45,9 +56,9 @@ JOIN
 JOIN
     KKBD_NEW ON SSZD_NEW.SSZD_SSI_BNR_COD = KKBD_NEW.KKBD_SSI_BNR_COD
 JOIN
-    GMSD_NEW ON KKBD_NEW.KKBD_SSI_BNR_COD = GMSD_NEW.GMSD_SSI_BNR_COD
+    BVTG1_GMSD GMSD ON KKBD_NEW.KKBD_SSI_BNR_COD = GMSD.GMSD_KEK_KBN_COD
 WHERE
-    PPJD.PPJD_GMS_COD <> GMSD_NEW.GMSD_GMS_COD
+    PPJD.PPJD_GMS_COD <> GMSD.GMSD_GMS_COD
 ORDER BY
     PPJD.PPJD_KHA_COD,
     PPJD.PPJD_SZK_COD,
