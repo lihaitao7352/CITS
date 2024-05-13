@@ -62,3 +62,62 @@ ORDER BY
     PPJD.PPJD_KHA_COD,
     PPJD.PPJD_SZK_COD,
     PPJD.PPJD_PJ_COD;
+
+
+---- 最新の組織属性コードと分類コードを取得
+WITH SSZD_NEW AS (
+    SELECT
+        SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
+        SSZD.SSZD_SSI_BNR_COD -- 組織属性_組織_分類_コード
+    FROM
+        BVTB3_SSZD SSZD
+    WHERE
+        SSZD.SSZD_TEK_STR_YM = (
+            SELECT MAX(SZD.SSZD_TEK_STR_YM)
+            FROM BVTB3_SSZD SZD
+            WHERE SZD.SSZD_SSI_COD = SSZD.SSZD_SSI_COD
+        )
+),
+-- 契約区分情報_組織_分類_コードの取得
+KKBD_NEW AS (
+    SELECT
+        KKBD.KKBD_SSI_BNR_COD, -- 契約区分情報_組織_分類_コード
+        KKBD.KKBD_KEK_KBN_COD  -- 契約区分情報_契約_区分_コード
+    FROM
+        BVTG1_KKBD KKBD
+    WHERE
+        KKBD.KKBD_KEK_KBN_COD LIKE '9%'
+),
+-- 業務種別情報の取得
+GMSD_NEW AS (
+    SELECT
+        GMSD.GMSD_KEK_KBN_COD, -- 業務種別情報_契約_区分_コード
+        GMSD.GMSD_GMS_COD -- 業務種別情報_業務種別_コード
+    FROM
+        BVTG1_GMSD GMSD
+    WHERE
+        GMSD.GMSD_KEK_KBN_COD IN (SELECT KKBD_KEK_KBN_COD FROM KKBD_NEW)
+)
+
+SELECT
+    PPJD.PPJD_KHA_COD AS 会社コード,
+    PPJD.PPJD_SZK_COD AS 所属コード,
+    PPJD.PPJD_PJ_COD AS プロジェクトコード,
+    PPJD.PPJD_GMS_COD AS プ業種コード,
+    GMSD.GMSD_GMS_COD AS 業種定数業別コード,
+    PPJD.PPJD_CKS_YMD AS 着手日,
+    PPJD.PPJD_KRY_YMD AS 完了日
+FROM
+    BGTA3_PPJD PPJD
+JOIN
+    SSZD_NEW ON PPJD.PPJD_SZK_COD = SSZD_NEW.SSZD_SSI_COD
+JOIN
+    KKBD_NEW ON SSZD_NEW.SSZD_SSI_BNR_COD = KKBD_NEW.KKBD_SSI_BNR_COD
+JOIN
+    GMSD_NEW ON KKBD_NEW.KKBD_KEK_KBN_COD = GMSD_NEW.GMSD_KEK_KBN_COD
+WHERE
+    PPJD.PPJD_GMS_COD <> GMSD_NEW.GMSD_GMS_COD
+ORDER BY
+    PPJD.PPJD_KHA_COD,
+    PPJD.PPJD_SZK_COD,
+    PPJD.PPJD_PJ_COD;
