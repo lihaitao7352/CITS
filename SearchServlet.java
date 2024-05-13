@@ -1,12 +1,7 @@
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -36,8 +31,7 @@ public class SearchServlet extends HttpServlet {
         try (Connection conn = DriverManager.getConnection(url, user, password);
              Statement stmt = conn.createStatement()) {
 
-            // SQL 查询语句
-            String query = "SELECT " +
+             String query = "SELECT " +
                                 "SKMD.SKMD_KM_COD, " +
                                 "AKND.AKND_AKN_MSY, " +
                                 "SKMD.SKMD_SZK_COD, " +
@@ -56,28 +50,41 @@ public class SearchServlet extends HttpServlet {
                                     "AND YKMD.YKMD_KBY_VER_ID = (SELECT MAX(YKMD_KBY_VER_ID) FROM BGTA1_YKMD WHERE YKMD_KHA_COD = SKMD.SKMD_KHA_COD) " +
                            "WHERE " +
                                 "SKMD.SKMD_KBS_VER_ID = (SELECT MAX(SKMD_KBS_VER_ID) FROM BGTA2_SKMD WHERE SKMD_KHA_COD = SKMD.SKMD_KHA_COD)";
-            
-            // 执行查询
+                                
             ResultSet rs = stmt.executeQuery(query);
 
-            while (rs.next()) {
-                // 結果をオブジェクトに変換してリストに追加
-                Result result = new Result(
-                    rs.getString("SKMD_KM_COD"),
-                    rs.getString("AKND_AKN_MSY"),
-                    rs.getString("SKMD_SZK_COD"),
-                    rs.getString("SKMD_CKS_YMD"),
-                    rs.getString("SKMD_KRY_YMD"),
-                    rs.getString("YKMD_CKS_YMD"),
-                    rs.getString("YKMD_KRY_YMD")
-                );
-                initialResults.add(result);
+            // 既存のデータをクリア
+            stmt.executeUpdate("DELETE FROM temp_search_results");
+
+            try (PreparedStatement pstmt = conn.prepareStatement(
+                "INSERT INTO temp_search_results (item_code, item_name, organization_code, predicted_start_date, predicted_end_date, budget_start_date, budget_end_date) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                while (rs.next()) {
+                    Result result = new Result(
+                        rs.getString("item_code"),
+                        rs.getString("item_name"),
+                        rs.getString("organization_code"),
+                        rs.getDate("predicted_start_date"),
+                        rs.getDate("predicted_end_date"),
+                        rs.getDate("budget_start_date"),
+                        rs.getDate("budget_end_date")
+                    );
+                    initialResults.add(result);
+
+                    // 临时表へのデータ挿入
+                    pstmt.setString(1, result.getItemCode());
+                    pstmt.setString(2, result.getItemName());
+                    pstmt.setString(3, result.getOrganizationCode());
+                    pstmt.setDate(4, result.getPredictedStartDate());
+                    pstmt.setDate(5, result.getPredictedEndDate());
+                    pstmt.setDate(6, result.getBudgetStartDate());
+                    pstmt.setDate(7, result.getBudgetEndDate());
+                    pstmt.executeUpdate();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        // JSP に初期結果を渡して表示
         request.setAttribute("initialResults", initialResults);
         request.getRequestDispatcher("search.jsp").forward(request, response);
     }
