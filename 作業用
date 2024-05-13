@@ -1,18 +1,3 @@
-あなたの要件に基づいてSQLクエリを作成しましたが、
-一部のロジックで仮定や解釈が必要だった部分があります。
-また、`SSZD_NEW` および `KKBD_NEW` サブクエリでの最新日付の取得方法を具体化する必要がある点に注意してください。以下が提案するSQLクエリです：
-
-/*条件2.
-
-【プロジェクト予想・プロジェクト情報】のプ想プロ情報＿所属＿コードと
-【組織属性定数(BVTB3_SSZD)】の最新の組織属性＿組織＿コードをマッチングし組織属性＿組織＿分類＿コードを取得する。
-取得した「組織属性＿組織＿分類＿コード」と【契約区分定数(BVTG1_KKBD)】の「契約区分情報＿契約＿区分＿コード(9%)」の
-「契約区分情報＿組織＿分類＿コード」とマッチングする。マッチングしなければエラーとする。
-取得した「契約区分情報＿組織＿分類＿コード」と【業務種別定数(BVTG1_GMSD)】の「業務種別情報＿契約＿区分＿コード(GMSD_KEK_KBN_COD)」
-とマッチングして「業務種別情報＿業務種別＿コード」を取得する。
-取得した「業務種別情報＿業務種別＿コード」とプ【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿業務種別＿コード」を比較して
-アンマッチのプロジェクトを抽出する。
-
 WITH SSZD_NEW AS (
 SELECT
     SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
@@ -49,8 +34,8 @@ SELECT
     PPJD.PPJD_KHA_COD AS 会社コード,
     PPJD.PPJD_SZK_COD AS 所属コード,
     PPJD.PPJD_PJ_COD AS プロジェクトコード,
-    PPJD.PPJD_GMS_COD AS プロジェクト情報業務種別コード,
-    GMSD.GMSD_GMS_COD AS 業務種別定数業務種別コード,
+    PPJD.PPJD_GMS_COD AS プロ情業種コード,
+    GMSD.GMSD_GMS_COD AS 業種定数コード,
     PPJD.PPJD_CKS_YMD AS 着手日,
     PPJD.PPJD_KRY_YMD AS 完了日
 FROM
@@ -58,8 +43,6 @@ FROM
 JOIN
     SSZD_NEW ON PPJD.PPJD_SZK_COD = SSZD_NEW.SSZD_SSI_COD
 JOIN
---取得した「組織属性＿組織＿分類＿コード」と【契約区分定数(BVTG1_KKBD)】の「契約区分情報＿契約＿区分＿コード(9%)」
---の「契約区分情報＿組織＿分類＿コード」とマッチングする。マッチングしなければエラーとする。
     KKBD_NEW ON SSZD_NEW.SSZD_SSI_BNR_COD = KKBD_NEW.KKBD_SSI_BNR_COD
 JOIN
     GMSD_NEW ON KKBD_NEW.KKBD_SSI_BNR_COD = GMSD_NEW.GMSD_SSI_BNR_COD
