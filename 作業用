@@ -40,4 +40,5 @@ WHERE
 件名コード
 着手日
 完了日
-
+java.sql.SQLIntegrityConstraintViolationException: ORA-01400: ("SBX"."BGTZZ_JTLD"."JTLD_SSI_RYS")にはNULLは挿入できません。
+人件費予定単価一覧の人件予単一覧＿組織＿略称にNULLは挿入できない。
