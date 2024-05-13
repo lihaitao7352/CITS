@@ -1,59 +1,26 @@
---sql1
-WITH SSZD_NEW AS (
-    SELECT
-        SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
-        SSZD.SSZD_SSI_BNR_COD -- 組織属性_組織_分類_コード
-    FROM
-        BVTB3_SSZD SSZD
-    WHERE
-        SSZD.SSZD_TEK_STR_YM = (
-            SELECT MAX(SZD.SSZD_TEK_STR_YM)
-            FROM BVTB3_SSZD SZD
-            WHERE SZD.SSZD_SSI_COD = SSZD.SSZD_SSI_COD
-        )
-),
-KKBD_NEW AS (
-    SELECT
-        KKBD.KKBD_SSI_BNR_COD, -- 契約区分情報_組織_分類_コード
-        KKBD.KKBD_KEK_KBN_COD  -- 契約区分情報_契約_区分_コード
-    FROM
-        BVTG1_KKBD KKBD
-    WHERE
-        KKBD.KKBD_KEK_KBN_COD LIKE '9%'
-),
-GMSD_NEW AS (
-    SELECT
-        GMSD.GMSD_KEK_KBN_COD, -- 業務種別情報_契約_区分_コード
-        GMSD.GMSD_GMS_COD -- 業務種別情報_業務種別_コード
-    FROM
-        BVTG1_GMSD GMSD
-)
-SELECT
-    PPJD.PPJD_KHA_COD AS 会社コード,
-    PPJD.PPJD_SZK_COD AS 所属コード,
-    PPJD.PPJD_PJ_COD AS プロジェクトコード,
-    PPJD.PPJD_GMS_COD AS プ業種コード,
-    GMSD_NEW.GMSD_GMS_COD AS 業種定数業別コード,
-    PPJD.PPJD_CKS_YMD AS 着手日,
-    PPJD.PPJD_KRY_YMD AS 完了日
-FROM
-    BGTA3_PPJD PPJD
-JOIN
-    SSZD_NEW ON PPJD.PPJD_SZK_COD = SSZD_NEW.SSZD_SSI_COD
-JOIN
-    KKBD_NEW ON SSZD_NEW.SSZD_SSI_BNR_COD = KKBD_NEW.KKBD_SSI_BNR_COD
-JOIN
-    GMSD_NEW ON KKBD_NEW.KKBD_KEK_KBN_COD = GMSD_NEW.GMSD_KEK_KBN_COD
-WHERE
-   PPJD.PPJD_GMS_COD <> GMSD_NEW.GMSD_GMS_COD
-ORDER BY
-    PPJD.PPJD_KHA_COD,
-    PPJD.PPJD_SZK_COD,
-    PPJD.PPJD_PJ_COD
+/*条件2.
 
+【プロジェクト予想・プロジェクト情報】のプ想プロ情報＿所属＿コードと
+【組織属性定数(BVTB3_SSZD)】の最新の組織属性＿組織＿コードをマッチングし組織属性＿組織＿分類＿コードを取得する。
+取得した「組織属性＿組織＿分類＿コード」と【契約区分定数(BVTG1_KKBD)】の「契約区分情報＿契約＿区分＿コード(9%)」の
+「契約区分情報＿組織＿分類＿コード」とマッチングする。マッチングしなければエラーとする。
 
----------------------------
---sql2
+取得した「契約区分情報＿組織＿分類＿コード」と【業務種別定数(BVTG1_GMSD)】の「業務種別情報＿契約＿区分＿コード(GMSD_KEK_KBN_COD)」
+とマッチングして「業務種別情報＿業務種別＿コード」を取得する。
+
+取得した「業務種別情報＿業務種別＿コード」とプ【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿業務種別＿コード」を比較して
+アンマッチのプロジェクトを抽出する。
+取得項目
+①会社コード
+②所属コード
+③プロジェクトコード
+④プロジェクト予想・プロジェクト情報/業務種別コード　
+⑤業務種別定数/業務種別コード
+⑥着手日
+⑦完了日
+ソート
+①②③
+*/
 WITH SSZD_NEW AS (
 SELECT
     SSZD.SSZD_SSI_COD, -- 組織属性_組織_コード
@@ -96,6 +63,4 @@ WHERE
 ORDER BY
     PPJD.PPJD_KHA_COD,
     PPJD.PPJD_SZK_COD,
-    PPJD.PPJD_PJ_COD
-
-在si object 中sql1的执行结果会有一个弹窗，而sql2直接出现查询结果
+    PPJD.PPJD_PJ_COD;
