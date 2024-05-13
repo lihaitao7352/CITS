@@ -31,7 +31,8 @@ public class SearchServlet extends HttpServlet {
         try (Connection conn = DriverManager.getConnection(url, user, password);
              Statement stmt = conn.createStatement()) {
 
-             String query = "SELECT " +
+            // SQLクエリの実行
+            String query = "SELECT " +
                                 "SKMD.SKMD_KM_COD, " +
                                 "AKND.AKND_AKN_MSY, " +
                                 "SKMD.SKMD_SZK_COD, " +
@@ -50,12 +51,12 @@ public class SearchServlet extends HttpServlet {
                                     "AND YKMD.YKMD_KBY_VER_ID = (SELECT MAX(YKMD_KBY_VER_ID) FROM BGTA1_YKMD WHERE YKMD_KHA_COD = SKMD.SKMD_KHA_COD) " +
                            "WHERE " +
                                 "SKMD.SKMD_KBS_VER_ID = (SELECT MAX(SKMD_KBS_VER_ID) FROM BGTA2_SKMD WHERE SKMD_KHA_COD = SKMD.SKMD_KHA_COD)";
-                                
             ResultSet rs = stmt.executeQuery(query);
 
-            // 既存のデータをクリア
+            // 一時表のデータをクリア
             stmt.executeUpdate("DELETE FROM temp_search_results");
 
+            // 一時表へのデータ挿入準備
             try (PreparedStatement pstmt = conn.prepareStatement(
                 "INSERT INTO temp_search_results (item_code, item_name, organization_code, predicted_start_date, predicted_end_date, budget_start_date, budget_end_date) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
                 while (rs.next()) {
@@ -70,7 +71,7 @@ public class SearchServlet extends HttpServlet {
                     );
                     initialResults.add(result);
 
-                    // 临时表へのデータ挿入
+                    // 一時表にデータを保存
                     pstmt.setString(1, result.getItemCode());
                     pstmt.setString(2, result.getItemName());
                     pstmt.setString(3, result.getOrganizationCode());
@@ -85,6 +86,7 @@ public class SearchServlet extends HttpServlet {
             e.printStackTrace();
         }
 
+        // 結果をリクエスト属性に設定し、JSPで表示できるようにする
         request.setAttribute("initialResults", initialResults);
         request.getRequestDispatcher("search.jsp").forward(request, response);
     }
