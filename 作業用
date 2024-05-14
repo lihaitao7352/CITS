@@ -1,31 +1,33 @@
-/*
-【プロジェクト予想・プロジェクト情報】の「プ想プロ情報＿件名＿コード」(複数あり)一件に絞り
-【件名予想・件名情報】の最新バージョン(指定63)の「プ予想件名情報＿件名＿コード」とマッチングして
-「プ想プロ情報＿業務種別＿コード」と「予想件名情報＿業務種別＿コード」に差異があるプロジェクトを抽出する。*/
+WITH FilteredPPJD AS (
+    SELECT
+        PPJD.*,
+        ROW_NUMBER() OVER (PARTITION BY PPJD.PPJD_PJ_COD ORDER BY PPJD.PPJD_KM_COD) AS rn
+    FROM
+        BGTA3_PPJD PPJD
+)
 SELECT
-    PPJD.PPJD_KHA_COD AS 会社コード,
-    PPJD.PPJD_SZK_COD AS 所属コード,
-    PPJD.PPJD_PJ_COD AS プロジェクトコード,
-    PPJD.PPJD_KM_COD AS 件名コード,
-    PPJD.PPJD_GMS_COD AS 業務種別コード,
-    PPJD.PPJD_CKS_YMD AS 着手日,
-    PPJD.PPJD_KRY_YMD AS 完了日
+    FPJD.PPJD_KHA_COD AS 会社コード,
+    FPJD.PPJD_SZK_COD AS 所属コード,
+    FPJD.PPJD_PJ_COD AS プロジェクトコード,
+    FPJD.PPJD_KM_COD AS 件名コード,
+    FPJD.PPJD_GMS_COD AS 業務種別コード,
+    FPJD.PPJD_CKS_YMD AS 着手日,
+    FPJD.PPJD_KRY_YMD AS 完了日
 FROM
-    BGTA3_PPJD PPJD
+    FilteredPPJD FPJD
 JOIN
-    BGTA2_SKMD SKMD ON PPJD.PPJD_KM_COD = SKMD.SKMD_KM_COD
+    BGTA2_SKMD SKMD ON FPJD.PPJD_KM_COD = SKMD.SKMD_KM_COD
     AND SKMD.SKMD_KBS_VER_ID = (
         SELECT MAX(SKMD_KBS_VER_ID)
         FROM BGTA2_SKMD
-        WHERE SKMD_KHA_COD = SKMD.SKMD_KHA_COD
-          AND SKMD_KM_COD = SKMD.SKMD_KM_COD
+        WHERE SKMD.SKMD_KHA_COD = FPJD.PPJD_KHA_COD
+          AND SKMD.SKMD_KM_COD = FPJD.PPJD_KM_COD
     )
 WHERE
-    PPJD.PPJD_GMS_COD <> SKMD.SKMD_GMS_COD
+    FPJD.rn = 1
+    AND FPJD.PPJD_GMS_COD <> SKMD.SKMD_GMS_COD
 ORDER BY
-    PPJD.PPJD_KHA_COD,
-    PPJD.PPJD_SZK_COD,
-    PPJD.PPJD_PJ_COD,
-    PPJD.PPJD_KM_COD
-GROUP BY
-    PPJD.PPJD_PJ_COD
+    FPJD.PPJD_KHA_COD,
+    FPJD.PPJD_SZK_COD,
+    FPJD.PPJD_PJ_COD,
+    FPJD.PPJD_KM_COD;
