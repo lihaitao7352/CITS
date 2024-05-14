@@ -99,3 +99,46 @@ ORDER BY
     PPJD.PPJD_SZK_COD,
     PPJD.PPJD_PJ_COD,
     PPJD.PPJD_KM_COD;
+
+
+
+-- 获取唯一的件名代码
+WITH DistinctPPJD AS (
+    SELECT DISTINCT
+        PPJD.PPJD_KHA_COD,
+        PPJD.PPJD_SZK_COD,
+        PPJD.PPJD_PJ_COD,
+        PPJD.PPJD_KM_COD,
+        PPJD.PPJD_GMS_COD,
+        PPJD.PPJD_CKS_YMD,
+        PPJD.PPJD_KRY_YMD
+    FROM
+        BGTA3_PPJD PPJD
+)
+-- 比较并查找业务种别代码不匹配的记录
+SELECT
+    DP.PPJD_KHA_COD AS 会社コード,
+    DP.PPJD_SZK_COD AS 所属コード,
+    DP.PPJD_PJ_COD AS プロジェクトコード,
+    DP.PPJD_KM_COD AS 件名コード,
+    DP.PPJD_GMS_COD AS プロジェクト業务種别コード,
+    SKMD.SKMD_GMS_COD AS 件名業务種别コード,
+    DP.PPJD_CKS_YMD AS 着手日,
+    DP.PPJD_KRY_YMD AS 完了日
+FROM
+    DistinctPPJD DP
+JOIN
+    BGTA2_SKMD SKMD ON DP.PPJD_KM_COD = SKMD.SKMD_KM_COD
+    AND SKMD.SKMD_KBS_VER_ID = (
+        SELECT MAX(SKMD_KBS_VER_ID)
+        FROM BGTA2_SKMD
+        WHERE SKMD.SKMD_KHA_COD = DP.PPJD_KHA_COD
+          AND SKMD.SKMD_KM_COD = DP.PPJD_KM_COD
+    )
+WHERE
+    DP.PPJD_GMS_COD <> SKMD.SKMD_GMS_COD
+ORDER BY
+    DP.PPJD_KHA_COD,
+    DP.PPJD_SZK_COD,
+    DP.PPJD_PJ_COD,
+    DP.PPJD_KM_COD;
