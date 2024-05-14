@@ -12,21 +12,10 @@ SELECT
     s.schemaname,
     s.logon_time,
     s.host,
-    nvl(s.client_identifier, 'N/A') as client_identifier
-FROM
-    v$session s
-WHERE
-    s.audsid = sys_context('USERENV', 'SESSIONID');
-
-
-SELECT
-    ci.sid,
-    ci.client_version,
-    ci.client_charset,
-    ci.client_os_user,
-    ci.network_service_banner,
     ci.client_address
 FROM
-    v$session_connect_info ci
+    v$session s
+JOIN
+    v$session_connect_info ci ON s.sid = ci.sid
 WHERE
-    ci.sid = (SELECT s.sid FROM v$session s WHERE s.audsid = sys_context('USERENV', 'SESSIONID'));
+    s.audsid = sys_context('USERENV', 'SESSIONID');
