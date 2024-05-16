@@ -1,0 +1,24 @@
+テーブル名	テーブルＩＤ		項目名	項目ＩＤ	条件	項目名	項目ＩＤ	条件
+会社別原価費目定数	BVTG1_KGHD		会社別費目＿会社＿コード	KGHD_KHA_COD	20512			
+業務種別定数	BVTG1_GMSD		業務種別情報＿会社＿コード	GMSD_KHA_COD	20512			
+原価管理用会社定数	BVTG1_GKKD		原管用会社＿会社＿コード	GKKD_KHA_COD	20512			
+原価費目勘定科目対応定数	BVTG1_GHKD		原勘対応＿会社＿コード	GHKD_KHA_COD	20512			
+原価費目配賦基準対応定数	BVTG1_GHHD		原配対応＿会社＿コード	GHHD_KHA_COD	20512			
+件名定数	BVTA1_KMID		件名情報＿会社＿コード	KMID_KHA_COD	20512			
+件名別配賦基準値	BGTZZ_KHKD		件名配賦＿会社＿コード	KHKD_KHA_COD	20512			
+件名別配賦対象予想	BGTA2_SKHD		予想件名配賦＿会社＿コード	SKHD_KHA_COD	20512			
+件名別配賦対象予想（原価計算前後）	BGTA2_SHKD		予想配賦計算＿会社＿コード	SHKD_KHA_COD	20512	予想配賦計算＿件名別予想＿バージョン＿ＩＤ	SHKD_KBS_VER_ID	65以上
+件名別予想・件名情報	BGTA2_SKMD		予想件名情報＿会社＿コード	SKMD_KHA_COD	20512	予想件名情報＿件名別予想＿バージョン＿ＩＤ	SKMD_KBS_VER_ID	65以上
+件名別予想計算結果（原価計算中）	BGTA2_SKDD	★	予想計算中＿会社＿コード	SKDD_KHA_COD	20512	予想計算中＿件名別予想＿バージョン＿ＩＤ	SKDD_KBS_VER_ID	65以上
+件名別予想計算結果（原価計算中・部門間取引全体）	BGTA2_SDWD		予想計算中部＿会社＿コード	SDWD_KHA_COD	20512	予想計算中部＿件名別予想＿バージョン＿ＩＤ	SDWD_KBS_VER_ID	65以上
+件名別予想バージョン	BGTAZ_SKVD		件名予想Ｖ＿会社＿コード	SKVD_KHA_COD	20512	件名予想Ｖ＿件名別予想＿バージョン＿ＩＤ	SKVD_KBS_VER_ID	65以上
+件名別予想・直接費（人件費以外）	BGTA2_SCHD		予想件名直費＿会社＿コード	SCHD_KHA_COD	20512	予想件名直費＿件名別予想＿バージョン＿ＩＤ	SCHD_KBS_VER_ID	65以上
+件名別予想・部門間原価	BGTA2_SBGD		予想部門原価＿会社＿コード	SBGD_KHA_COD	20512	予想部門原価＿件名別予想＿バージョン＿ＩＤ	SBGD_KBS_VER_ID	65以上
+件名別予想・予想工数	BGTA2_SYKD		予想件名工数＿会社＿コード	SYKD_KHA_COD	20512	予想件名工数＿件名別予想＿バージョン＿ＩＤ	SYKD_KBS_VER_ID	65以上
+組織定数	BVTB3_SSID		組織情報＿会社＿コード	SSID_KHA_COD	20512			
+組織属性定数	BVTB3_SSZD		組織属性＿組織＿コード	SSZD_SSI_COD	TCS%			
+損失引当金自動計上定数	BVTG1_SHKD		損失引当金＿会社＿コード	SHKD_KHA_COD	20512			
+多段階組織配賦基準値	BGTZZ_THKD		多段階配賦＿会社＿コード	THKD_KHA_COD	20512			
+配賦対象組織パターン	BGTZZ_HTPD		配賦Ｐ＿会社＿コード	HTPD_KHA_COD	20512			
+配賦対象組織パターンツリー	BGTZZ_HTTD		配賦Ｔ＿会社＿コード	HTTD_KHA_COD	20512			
+配賦対象組織パターン明細	BGTZZ_HTPM		配賦Ｐ明細＿会社＿コード	HTPM_KHA_COD	20512			
