@@ -2,3 +2,6 @@
     "SELECT COUNT(*) FROM " & G2742 & " WHERE " & MID(G2742, 7, 4) & "_KHA_COD = '20512' AND " & INDEX(K$2742:K2742, MATCH(2, I$2742:I2742, 0)) & " = '" & I2742 & "'",
     "SELECT COUNT(*) FROM " & G2742 & " WHERE " & MID(G2742, 7, 4) & "_KHA_COD = '20512' AND " & INDEX(K2742:K$2772, MATCH(2, I2742:I$2772, 0)) & " = '" & I2742 & "'"
 )
+
+
+="SELECT COUNT(*) FROM " & G2745 & " WHERE " & MID(G2745, 7, 4) & "_KHA_COD = '20512' AND another_column = 'another_value'"
