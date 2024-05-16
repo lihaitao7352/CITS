@@ -139,3 +139,6 @@ WHERE HTPM_KHA_COD = 20512;
 ="AND " & H63 & " = '" & 指示!$I$8 & "' AND (" & H67 & " IN (" & 指示!$J$1 & ") OR " & H67 & " IN (" & 指示!$J$1 & "))"
 
 AND YBGD_KBY_VER_ID = '15' AND (YBGD_IRS_SZK_COD IN (("TCS0154","TCS0415","TCS0416","TCS0443","TCS0444","TCS0446","TCS0447","TCS0449","TCS0450","TCS0452","TCS0453","TCS0457","TCS0458","TCS1473","TCS1474","TCS1490","TCS1495")) OR YBGD_IRS_SZK_COD IN ())
+
+
+AND column_name_1 = 'some_value' AND (column_name_2 IN (1, 2, 3, ...) OR column_name_2 IN (1, 2, 3, ...))
