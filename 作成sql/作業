@@ -143,3 +143,6 @@ AND YBGD_KBY_VER_ID = '15' AND (YBGD_IRS_SZK_COD IN (("TCS0154","TCS0415","TCS04
 
 AND column_name_1 = 'some_value' AND (column_name_2 IN (1, 2, 3, ...) OR column_name_2 IN (1, 2, 3, ...))
 ="SELECT * FROM "&G2742&MID(G2742,7,4)&"_KHA_COD = '20512'"
+
+
+="SELECT COUNT(*) FROM " & G2742 & " WHERE " & MID(G2742, 7, 4) & "_KHA_COD = '20512' AND another_column = 'another_value'"
