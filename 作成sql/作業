@@ -146,3 +146,10 @@ AND column_name_1 = 'some_value' AND (column_name_2 IN (1, 2, 3, ...) OR column_
 
 
 ="SELECT COUNT(*) FROM " & G2742 & " WHERE " & MID(G2742, 7, 4) & "_KHA_COD = '20512' AND another_column = 'another_value'"
+
+
+
+=IF(I2742 > 2,
+    "SELECT COUNT(*) FROM " & G2742 & " WHERE " & MID(G2742, 7, 4) & "_KHA_COD = '20512' AND " & INDEX(K$2742:K$2772, LOOKUP(2, 1/(I$2742:I2742=2), ROW(I$2742:I2742)-ROW(I$2742)+1)) & " = '" & I2742 & "'",
+    "SELECT COUNT(*) FROM " & G2742 & " WHERE " & MID(G2742, 7, 4) & "_KHA_COD = '20512' AND " & INDEX(K$2742:K$2772, MATCH(2, I2742:I$2772, 0)) & " = '" & I2742 & "'"
+)
