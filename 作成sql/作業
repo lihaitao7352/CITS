@@ -8,3 +8,6 @@
     "AND " & INDEX(B$2:B2, MATCH(2, C$2:C2, 0)) & " = " & IF(LEFT(A2, 5)="BGTA1", 15, IF(LEFT(A2, 5)="BGTA2", 66, "")),
     "AND " & INDEX(B2:B$20, MATCH(2, C2:C$20, 0)) & " = " & IF(LEFT(A2, 5)="BGTA1", 15, IF(LEFT(A2, 5)="BGTA2", 66, ""))
 )
+
+
+="SELECT COUNT(*) FROM " & G2742 & " WHERE " & MID(G2742, 7, 4) & "_KHA_COD = '20512'  AND  "  & MID(G2742, 7, 4) & "_KBY_VER_ID  = '15'"
